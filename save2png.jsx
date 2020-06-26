@@ -174,3 +174,21 @@ function getBorderRadius() {
         return (false)
     }
 }
+
+// 获取填充色
+function getFillColor(){
+   var ref = new ActionReference();
+   ref.putEnumerated( stringIDToTypeID( "contentLayer" ), charIDToTypeID( "Ordn" ), charIDToTypeID( "Trgt" ));
+   var ref1= executeActionGet( ref );
+   var list =  ref1.getList( charIDToTypeID( "Adjs" ) ) ;
+   var solidColorLayer = list.getObjectValue(0);       
+   var color = solidColorLayer.getObjectValue(charIDToTypeID('Clr '));
+   var fillcolor = new SolidColor;
+      fillcolor.rgb.red = color.getDouble(charIDToTypeID('Rd  '));
+      fillcolor.rgb.green = color.getDouble(charIDToTypeID('Grn '));
+      fillcolor.rgb.blue = color.getDouble(charIDToTypeID('Bl  '));
+
+      alert(fillcolor.rgb.hexValue);
+//    return fillcolor.rgb.hexValue;
+}
+
