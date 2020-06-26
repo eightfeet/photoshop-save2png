@@ -38,6 +38,13 @@ try {
         info = info + '  border-radius: ' + radius + ';'
     }
 
+    // 背景色
+    var bgcolor = getFillColor();
+    if (bgcolor) {
+        content = content + '\nbackground-color: #' + bgcolor;
+        info = info + '  background-color: #' + bgcolor + ';'
+    }
+
     // 文字类型时
     if (cDoc.kind === LayerKind.TEXT) {
         // cDoc.textItem.contents 文本内容
@@ -177,18 +184,20 @@ function getBorderRadius() {
 
 // 获取填充色
 function getFillColor(){
-   var ref = new ActionReference();
-   ref.putEnumerated( stringIDToTypeID( "contentLayer" ), charIDToTypeID( "Ordn" ), charIDToTypeID( "Trgt" ));
-   var ref1= executeActionGet( ref );
-   var list =  ref1.getList( charIDToTypeID( "Adjs" ) ) ;
-   var solidColorLayer = list.getObjectValue(0);       
-   var color = solidColorLayer.getObjectValue(charIDToTypeID('Clr '));
-   var fillcolor = new SolidColor;
-      fillcolor.rgb.red = color.getDouble(charIDToTypeID('Rd  '));
-      fillcolor.rgb.green = color.getDouble(charIDToTypeID('Grn '));
-      fillcolor.rgb.blue = color.getDouble(charIDToTypeID('Bl  '));
-
-      alert(fillcolor.rgb.hexValue);
-//    return fillcolor.rgb.hexValue;
+   try {
+        var ref = new ActionReference();
+        ref.putEnumerated( stringIDToTypeID( "contentLayer" ), charIDToTypeID( "Ordn" ), charIDToTypeID( "Trgt" ));
+        var ref1= executeActionGet( ref );
+        var list =  ref1.getList( charIDToTypeID( "Adjs" ) ) ;
+        var solidColorLayer = list.getObjectValue(0);       
+        var color = solidColorLayer.getObjectValue(charIDToTypeID('Clr '));
+        var fillcolor = new SolidColor;
+            fillcolor.rgb.red = color.getDouble(charIDToTypeID('Rd  '));
+            fillcolor.rgb.green = color.getDouble(charIDToTypeID('Grn '));
+            fillcolor.rgb.blue = color.getDouble(charIDToTypeID('Bl  '));
+        return fillcolor.rgb.hexValue;
+   }
+   catch(err){
+     return false
+   }
 }
-
