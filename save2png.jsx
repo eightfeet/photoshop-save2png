@@ -26,10 +26,18 @@ try {
     'top : ' + LTop + 'px; \n' +
     'left : ' + LLeft + 'px;';
 
-    var info ='width: ' + LWidth + 'px;     ' +
-    'height: ' + LHeight + 'px;     ' +
-    'top : ' + LTop + 'px;     ' +
-    'left : ' + LLeft + 'px;    ';
+    var info ='width: ' + LWidth + 'px;  ' +
+    'height: ' + LHeight + 'px;  ' +
+    'top : ' + LTop + 'px;  ' +
+    'left : ' + LLeft + 'px;';
+
+    // 角弧度
+    var radius = getBorderRadius();
+    if (radius) {
+        content = content + '\nborder-radius: ' + radius;
+        info = info + '  border-radius: ' + radius + ';'
+    }
+
     // 文字类型时
     if (cDoc.kind === LayerKind.TEXT) {
         // cDoc.textItem.contents 文本内容
@@ -40,8 +48,8 @@ try {
         content + '\n' +
         cDoc.textItem.contents;
 
-        info = info + 'font-size: ' + Math.floor(cDoc.textItem.size) + 'px; ' +
-        '     color: ' + '#' + cDoc.textItem.color.rgb.hexValue + ';';
+        info = info + '  font-size: ' + Math.floor(cDoc.textItem.size) + 'px; ' +
+        ' color: ' + '#' + cDoc.textItem.color.rgb.hexValue + ';';
     }
 
     // 拷贝属性
@@ -55,8 +63,9 @@ try {
     dlg.msgStName = G1.add('statictext', undefined, '/' + activeDocument.activeLayer.name + '.png');
 
     // 定制UI
-    dlg.msgPnl = dlg.add('panel', undefined, '');
+    dlg.msgPnl = dlg.add('panel', undefined, '属性');
     dlg.msgPnl = dlg.msgPnl.add('statictext', undefined, info);
+    dlg.msgPnl.orientation = "column";
 
     dlg.msgFoot = dlg.add('group', undefined, '');
     dlg.msgFoot.orientation = "row";
@@ -125,11 +134,43 @@ function quick_export_png(path, layer) {
 }
 
 // 拷贝到剪切板
-
 function copyTextToClipboard(txt) {
     const keyTextData = app.charIDToTypeID("TxtD");
     const ktextToClipboardStr = app.stringIDToTypeID("textToClipboard");
     var textStrDesc = new ActionDescriptor();
     textStrDesc.putString(keyTextData, txt);
     executeAction(ktextToClipboardStr, textStrDesc, DialogModes.NO);
+}
+
+// 获取圆角
+function getBorderRadius() {
+    try {
+        var layer = activeDocument.activeLayer;
+        var r = new ActionReference();    
+        r.putIdentifier(stringIDToTypeID("layer"), layer.id);
+        var d = executeActionGet(r);
+        var idkeyOriginType = stringIDToTypeID( "keyOriginType" );
+        var idkeyOriginRRectRadii = stringIDToTypeID( "keyOriginRRectRadii" );
+        var rad = d.getList(idkeyOriginType).getObjectValue(0).getObjectValue(idkeyOriginRRectRadii);
+
+        var tl = rad.getUnitDoubleValue(stringIDToTypeID("topLeft"));
+        var tr = rad.getUnitDoubleValue(stringIDToTypeID("topRight"));
+        var br = rad.getUnitDoubleValue(stringIDToTypeID("bottomRight"));
+        var bl = rad.getUnitDoubleValue(stringIDToTypeID("bottomLeft"));
+        var result = null;
+        if (tl === br && tl === tr && tl === bl) {
+            result = tl + 'px';
+        } else if (tl === br && tr === bl && tr !== br) {
+            result = tl + 'px ' + tr + 'px';
+        } else if (tl !== br && tr === bl) {
+            result = tl + 'px ' + tr + 'px ' + br + 'px';
+        }
+        else {
+            result = tl + 'px ' + tr + 'px ' + br + 'px ' + bl + 'px';
+        }
+        return (result)
+    }
+    catch(err){
+        return (false)
+    }
 }
