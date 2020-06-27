@@ -20,18 +20,28 @@ try {
     dlg.msgEt = G1.add('edittext', [0, 0, 300, 20],  Path, { name: "path", multiline: false, noecho: false, readonly: false });
     dlg.msgStName = G1.add('statictext', undefined, '/' + activeDocument.activeLayer.name + '.png');
 
+    dlg.msgCheckbox = dlg.add('group', undefined, '');
+    dlg.msgCheckbox.orientation = "row";
     // 定制UI
-    dlg.checkbox = dlg.add('checkbox',undefined,'拷贝图层css和内容');   
+    dlg.msgCheckbox.checkbox = dlg.msgCheckbox.add('checkbox',undefined,'拷贝图层css和内容');   
     if ($.getenv("checkbox") === 'true') {
-        dlg.checkbox.value = true;
+        dlg.msgCheckbox.checkbox.value = true;
     }
     if ($.getenv("checkbox") === 'false' || $.getenv("checkbox") === null) {
-        dlg.checkbox.value = false;
+        dlg.msgCheckbox.checkbox.value = false;
+    }
+
+    dlg.msgCheckbox.checkboxno = dlg.msgCheckbox.add('checkbox',undefined,'不导出图片');   
+    if ($.getenv("checkboxno") === 'true') {
+        dlg.msgCheckbox.checkboxno.value = true;
+    }
+    if ($.getenv("checkboxno") === 'false' || $.getenv("checkboxno") === null) {
+        dlg.msgCheckbox.checkboxno.value = false;
     }
 
     dlg.msgFoot = dlg.add('group', undefined, '');
     dlg.msgFoot.orientation = "row";
-    dlg.msgFoot.btn = dlg.msgFoot.add('button', undefined, '导出', { name: "export" });
+    dlg.msgFoot.btn = dlg.msgFoot.add('button', undefined, '确定', { name: "export" });
     dlg.msgFoot.buildBtn = dlg.msgFoot.add('button', undefined, '取消');
 
     // 事件处理
@@ -43,9 +53,14 @@ try {
 
     function actionDo(){
         $.setenv("Path", dlg.findElement("path").text)
-        quick_export_png($.getenv("Path"), true);
+        if (dlg.msgCheckbox.checkboxno.value === true) {
+            $.setenv("checkboxno", true);
+        } else {
+            $.setenv("checkboxno", false);
+            quick_export_png($.getenv("Path"), true);
+        }
         dlg.close();
-        if (dlg.checkbox.value === true) {
+        if (dlg.msgCheckbox.checkbox.value === true) {
             $.setenv("checkbox", true)
         } else {
             $.setenv("checkbox", false)
