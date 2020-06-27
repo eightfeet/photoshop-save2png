@@ -21,9 +21,9 @@ try {
     var LTop = LB[0].value; // 左边
     var LLeft = LB[1].value; // 右边
 
-    var content = 'width: ' + LWidth + 'px; \n' +
-    'height: ' + LHeight + 'px; \n' +
-    'top : ' + LTop + 'px; \n' +
+    var content = 'width: ' + LWidth + 'px; \n  ' +
+    'height: ' + LHeight + 'px; \n  ' +
+    'top : ' + LTop + 'px; \n  ' +
     'left : ' + LLeft + 'px;';
 
     var info ='width: ' + LWidth + 'px;  ' +
@@ -31,17 +31,30 @@ try {
     'top : ' + LTop + 'px;  ' +
     'left : ' + LLeft + 'px;';
 
+    // 透明度
+    if (FILLOPA !== 100 || OPA !== 100) {
+        if ((FILLOPA !== 100 && OPA === 100)){
+            content = content + '\n  opacity:' + FILLOPA*0.01
+        }
+        if ((FILLOPA === 100 && OPA !== 100)) {
+            content = content + '\n  opacity:' + OPA*0.01
+        }
+        if ((FILLOPA !== 100 && OPA !== 100)) {
+            content = content + '\n  opacity:' + OPA*0.01
+        }
+    }
+
     // 角弧度
     var radius = getBorderRadius();
     if (radius) {
-        content = content + '\nborder-radius: ' + radius;
+        content = content + '\n  border-radius: ' + radius + ';';
         info = info + '  border-radius: ' + radius + ';'
     }
 
     // 背景色
     var bgcolor = getFillColor();
     if (bgcolor) {
-        content = content + '\nbackground-color: #' + bgcolor;
+        content = content + '\n  background-color: #' + bgcolor + ';';
         info = info + '  background-color: #' + bgcolor + ';'
     }
 
@@ -50,17 +63,33 @@ try {
         // cDoc.textItem.contents 文本内容
         // cDoc.textItem.size 字体大小
         // cDoc.textItem.color.rgb.hexValue hex色彩值
-        content = 'font-size: ' + Math.floor(cDoc.textItem.size) + 'px; \n' +
-        'color: ' + '#' + cDoc.textItem.color.rgb.hexValue + '; \n' +
+        content = '.text' + '{\n  font-size: ' + Math.floor(cDoc.textItem.size) + 'px; \n  ' +
+        'color: ' + '#' + cDoc.textItem.color.rgb.hexValue + '; \n  ' +
         content + '\n' +
+        '}\n' +
         cDoc.textItem.contents;
 
         info = info + '  font-size: ' + Math.floor(cDoc.textItem.size) + 'px; ' +
         ' color: ' + '#' + cDoc.textItem.color.rgb.hexValue + ';';
+    } else {
+        content = '.'+ activeDocument.activeLayer.name + '{\n  ' +
+        content + '\n' +
+        '}'
     }
 
-    // 拷贝属性
-    copyTextToClipboard(content)
+    var hasEffects = prLayerHasKey('layerEffects');
+
+    // 有图层特效或者非
+    if (hasEffects) {
+        if (cDoc.kind === LayerKind.TEXT) {
+            copyTextToClipboard(content)
+        } else {
+            copyLayerCSS();
+        }
+    } else {
+        // 拷贝属性
+        copyTextToClipboard(content)
+    }
 
     // png导出面板
     var dlg = new Window('dialog', '导出为Png');
@@ -200,4 +229,29 @@ function getFillColor(){
    catch(err){
      return false
    }
+}
+
+function prLayerHasKey(key){
+    var ref = new ActionReference();
+    ref.putEnumerated( charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt") ); 
+    return  executeActionGet(ref).hasKey(stringIDToTypeID(key));
+}
+
+function copyLayerCSS(){
+    try {
+        //code
+        var idcopyLayerCSS = stringIDToTypeID( "copyLayerCSS" );
+        var desc396 = new ActionDescriptor();
+        var idnull = charIDToTypeID( "null" );
+        var ref83 = new ActionReference();
+        var idLyr = charIDToTypeID( "Lyr " );
+        var idOrdn = charIDToTypeID( "Ordn" );
+        var idTrgt = charIDToTypeID( "Trgt" );
+        ref83.putEnumerated( idLyr, idOrdn, idTrgt );
+        desc396.putReference( idnull, ref83 );
+        executeAction( idcopyLayerCSS, desc396, DialogModes.NO );
+    }
+    catch(x_x){
+        alert(x_x)
+    }
 }
