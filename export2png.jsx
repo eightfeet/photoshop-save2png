@@ -123,7 +123,7 @@ function quick_export_png(path, layer) {
 
     }
 
-    catch (e) { throw (e); }
+    catch (e) { alert(e); }
 
 }
 
